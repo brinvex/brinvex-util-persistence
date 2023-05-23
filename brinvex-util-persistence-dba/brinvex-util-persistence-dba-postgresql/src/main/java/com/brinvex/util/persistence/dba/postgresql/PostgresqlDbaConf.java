@@ -75,7 +75,7 @@ public class PostgresqlDbaConf {
     }
 
     public Path getPgHomePath() {
-        return pgHomePath == null ? pgHomePath = Paths.get("c:/", name, "pg_server") : pgHomePath;
+        return pgHomePath == null ? pgHomePath = Paths.get("c:/", name, "postgresql") : pgHomePath;
     }
 
     public PostgresqlDbaConf setPgHomePath(Path pgHomePath) {
@@ -84,12 +84,16 @@ public class PostgresqlDbaConf {
     }
 
     public Path getPgDataPath() {
-        return pgDataPath == null ? getPgHomePath().resolve("..").resolve("pg_data").normalize() : pgDataPath;
+        return pgDataPath == null ? getPgHomePath().resolve("pg_data").normalize() : pgDataPath;
     }
 
     public PostgresqlDbaConf setPgDataPath(Path pgDataPath) {
         this.pgDataPath = pgDataPath;
         return this;
+    }
+
+    public Path getPgSysPath() {
+        return getPgHomePath().resolve("pg_system").normalize();
     }
 
     public String getSuperUser() {
@@ -129,7 +133,7 @@ public class PostgresqlDbaConf {
     }
 
     public Path getPsqlPath() {
-        return psqlPath == null ? pgHomePath.resolve("bin/psql") : psqlPath;
+        return psqlPath == null ? getPgSysPath().resolve("bin/psql") : psqlPath;
     }
 
     public PostgresqlDbaConf setPsqlPath(Path psqlPath) {
@@ -208,7 +212,7 @@ public class PostgresqlDbaConf {
                 .add("port=" + port)
                 .add("pgHomePath=" + pgHomePath)
                 .add("pgDataPath=" + pgDataPath)
-                .add("pgDataBackupPath=" + pgDataBackupParentPath)
+                .add("pgDataBackupParentPath=" + pgDataBackupParentPath)
                 .add("superUser='" + superUser + "'")
                 .add("superPass='" + superPass + "'")
                 .add("winServiceName='" + winServiceName + "'")

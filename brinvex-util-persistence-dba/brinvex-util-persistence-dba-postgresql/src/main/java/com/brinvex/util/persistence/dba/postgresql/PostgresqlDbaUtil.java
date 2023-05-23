@@ -42,7 +42,7 @@ public class PostgresqlDbaUtil {
     public static void install(PostgresqlDbaConf conf) throws IOException {
         LOG.info("install {}", conf);
 
-        createFirewallRuleForPostgresqlConnections(conf);
+        initPostgresqlHomeFolder(conf);
 
         extractInstaller(conf);
 
@@ -62,6 +62,8 @@ public class PostgresqlDbaUtil {
 
         createAppUsers(conf);
 
+        createFirewallRuleForPostgresqlConnections(conf);
+
         restartPostgresqlWinService(conf);
 
         LOG.info("install - successfull {}", conf);
@@ -75,7 +77,7 @@ public class PostgresqlDbaUtil {
 
         backupPostgresqlData(conf);
 
-        deletePostgresqlHome(conf);
+        deletePostgresqlSystemFolder(conf);
 
         removeFirewallRuleForPostgresqlConnections(conf);
 
@@ -109,14 +111,14 @@ public class PostgresqlDbaUtil {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void deletePostgresqlHome(PostgresqlDbaConf conf) throws IOException {
-        Path pgHomePath = conf.getPgHomePath();
-        File pgHomePathFile = pgHomePath.toFile();
-        if (!pgHomePathFile.exists()) {
-            LOG.info("PG home folder does not exist: {}", pgHomePath);
+    public static void deletePostgresqlSystemFolder(PostgresqlDbaConf conf) throws IOException {
+        Path pgSysPath = conf.getPgSysPath();
+        File pgSysPathFile = pgSysPath.toFile();
+        if (!pgSysPathFile.exists()) {
+            LOG.info("PG system folder does not exist: {}", pgSysPath);
         } else {
-            LOG.info("Deleting PG home folder: {}", pgHomePath);
-            try (var dirStream = Files.walk(pgHomePath)) {
+            LOG.info("Deleting PG system folder: {}", pgSysPath);
+            try (var dirStream = Files.walk(pgSysPath)) {
                 dirStream.map(Path::toFile)
                         .sorted(Comparator.reverseOrder())
                         .forEach(File::delete);
@@ -269,7 +271,7 @@ public class PostgresqlDbaUtil {
     }
 
     public static void registerPostgresqlWinService(PostgresqlDbaConf conf) throws IOException {
-        Path pgCtlExePath = conf.getPgHomePath().resolve("bin/pg_ctl.exe");
+        Path pgCtlExePath = conf.getPgSysPath().resolve("bin/pg_ctl.exe");
         String winServiceName = conf.getWinServiceName();
         if (WindowsUtil.winServiceExists(winServiceName)) {
             LOG.info("Windows service already exists: {}", winServiceName);
@@ -280,7 +282,7 @@ public class PostgresqlDbaUtil {
     }
 
     public static void unregisterPostgresqlWindowsService(PostgresqlDbaConf conf) throws IOException {
-        Path pgCtlExePath = conf.getPgHomePath().resolve("bin/pg_ctl.exe");
+        Path pgCtlExePath = conf.getPgSysPath().resolve("bin/pg_ctl.exe");
         String winServiceName = conf.getWinServiceName();
         if (!WindowsUtil.winServiceExists(winServiceName)) {
             LOG.info("WinService already unregistered: {}", winServiceName);
@@ -317,20 +319,10 @@ public class PostgresqlDbaUtil {
     }
 
     public static void extractInstaller(PostgresqlDbaConf conf) throws IOException {
-        Path pgHomePath = conf.getPgHomePath().toAbsolutePath();
-        if (pgHomePath.toFile().exists()) {
-            LOG.info("PG home folder already exists - skipping installer extractions and main DB initialization: {}", pgHomePath);
+        Path pgSysPath = conf.getPgSysPath().toAbsolutePath();
+        if (pgSysPath.toFile().exists()) {
+            LOG.info("PG system folder already exists - skipping installer extractions: {}", pgSysPath);
         } else {
-            Path pgHomeParentPath = pgHomePath.getParent();
-            if (pgHomeParentPath.toFile().exists()) {
-                LOG.info("PG home parent folder already exists: {}", pgHomeParentPath);
-            } else {
-                LOG.info("Creating PG home parent folder: {}", pgHomeParentPath);
-                boolean mkdirs = pgHomeParentPath.toFile().mkdirs();
-                if (!mkdirs) {
-                    throw new IOException(String.format("PG home parent folder creation failed: %s", pgHomeParentPath));
-                }
-            }
             Path installerPath = conf.getInstallerPath();
             if (installerPath == null || !installerPath.toFile().exists()) {
                 throw new IllegalStateException(String.format("Installer not found: %s", installerPath));
@@ -340,16 +332,29 @@ public class PostgresqlDbaUtil {
             if (superPass == null || superPass.isBlank()) {
                 throw new IllegalStateException("Superpass can not be null");
             }
-            LOG.info("Extracting PG installer: {}, pgHome={}", installerPath, pgHomePath);
+            LOG.info("Extracting PG installer: {}, pgHome={}", installerPath, pgSysPath);
             OsCmdUtil.exec(installerPath +
                            " --mode unattended " +
                            " --enable-components server,commandlinetools " +
                            " --disable-components pgAdmin,stackbuilder " +
                            " --create_shortcuts 0 " +
-                           " --prefix " + pgHomePath + " " +
+                           " --prefix " + pgSysPath + " " +
                            " --superaccount " + superUser + " " +
                            " --superpassword " + superPass + " " +
                            " --extract-only 1");
+        }
+    }
+
+    public static void initPostgresqlHomeFolder(PostgresqlDbaConf conf) throws IOException {
+        Path pgHomePath = conf.getPgHomePath();
+        if (pgHomePath.toFile().exists()) {
+            LOG.info("PG home folder already exists: {}", pgHomePath);
+        } else {
+            LOG.info("Creating PG home folder: {}", pgHomePath);
+            boolean mkdirs = pgHomePath.toFile().mkdirs();
+            if (!mkdirs) {
+                throw new IOException(String.format("PG home folder creation failed: %s", pgHomePath));
+            }
         }
     }
 
@@ -365,7 +370,7 @@ public class PostgresqlDbaUtil {
             try {
                 Files.writeString(pgPwTmpFilePath, superPass, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
-                Path pgInitExePath = conf.getPgHomePath().resolve("bin/initdb.exe");
+                Path pgInitExePath = conf.getPgSysPath().resolve("bin/initdb.exe");
                 OsCmdUtil.exec(String.format("%s -D %s  -U %s --pwfile %s --auth=scram-sha-256 --locale=\"%s\"",
                         pgInitExePath, pgDataPath, superUser, pgPwTmpFilePath, conf.getPgLocale()));
 

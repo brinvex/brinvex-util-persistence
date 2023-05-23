@@ -33,14 +33,16 @@ public class PostgresqlDbaUtilTest {
     @EnabledIfSystemProperty(named = "enableHostSystemAffectingTests", matches = "true")
     @Test
     public void install_uninstall() throws IOException {
-        Path basePath = Paths.get("c:/prj/brinvex/brinvex-util/brinvex-util-persistence/BrinvexDbaTest");
+        Path testBasePath = Paths.get("c:/prj/brinvex/brinvex-util/brinvex-util-persistence/BrinvexDbaTest");
         PostgresqlDbaConf conf = new PostgresqlDbaConf()
                 .setName("BrinvexDbaTest")
-                .setPgHomePath(basePath.resolve("pg_server"))
+                .setPgHomePath(testBasePath.resolve("postgresql"))
                 .setSuperPass("S3cr3t!123")
                 .setPort(5431)
-                .setInstallerPath(basePath.resolve("install/postgresql-15.2-1-windows-x64.exe"))
+                .setInstallerPath(testBasePath.resolve("install/postgresql-15.2-1-windows-x64.exe"))
                 .addAllowedClientAddresses(List.of("192.168.0.0/16", "172.17.0.0/16"))
+                .addExtensions(List.of("btree_gist"))
+                .addAppUsers(Map.of("bx_app_user", "bx_app_user_123"))
                 .addSystemSettings(List.of(
                         "max_connections = '100'",
                         "max_prepared_transactions = '100'",
@@ -58,9 +60,7 @@ public class PostgresqlDbaUtilTest {
                         "max_parallel_workers_per_gather = '4'",
                         "max_parallel_workers = '8'",
                         "max_parallel_maintenance_workers = '4'"
-                ))
-                .addExtensions(List.of("btree_gist"))
-                .addAppUsers(Map.of("bx_app_user", "bx_app_user_123"));
+                ));
 
         LOG.debug("install - {}", conf);
         try {
