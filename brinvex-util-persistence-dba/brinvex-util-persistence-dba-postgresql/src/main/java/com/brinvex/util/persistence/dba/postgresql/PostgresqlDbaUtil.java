@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2023 Brinvex (dev@brinvex.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.brinvex.util.persistence.dba.postgresql;
 
 import com.brinvex.util.persistence.dba.common.OsCmdResult;
@@ -27,7 +42,7 @@ public class PostgresqlDbaUtil {
     public static void install(PostgresqlDbaConf conf) throws IOException {
         LOG.info("install {}", conf);
 
-        openFirewallForPostgresqlConnections(conf);
+        createFirewallRuleForPostgresqlConnections(conf);
 
         extractInstaller(conf);
 
@@ -62,6 +77,8 @@ public class PostgresqlDbaUtil {
 
         deletePostgresqlHome(conf);
 
+        removeFirewallRuleForPostgresqlConnections(conf);
+
         LOG.info("uninstall - successfull {}", conf);
 
     }
@@ -83,7 +100,7 @@ public class PostgresqlDbaUtil {
             LOG.info("No PG data folder to backup: {}", pgDataPath);
         } else {
             Path pgDataFileName = pgDataPath.getFileName();
-            String backupFileName = pgDataFileName + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_hhmmss"));
+            String backupFileName = pgDataFileName + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             Path pgDataBackupPath = pgDataBackupParentPath.resolve(backupFileName);
             LOG.info("Moving PG data folder to backup: {} -> {}", pgDataPath, pgDataBackupPath);
             Files.move(pgDataPath, pgDataBackupPath);
@@ -358,13 +375,23 @@ public class PostgresqlDbaUtil {
         }
     }
 
-    public static void openFirewallForPostgresqlConnections(PostgresqlDbaConf conf) throws IOException {
+    public static void createFirewallRuleForPostgresqlConnections(PostgresqlDbaConf conf) throws IOException {
         String firewallRuleName = conf.getFirewallRuleName();
         if (!WindowsUtil.firewallRuleExists(firewallRuleName)) {
             LOG.info("Creating firewall rule: {}", firewallRuleName);
             WindowsUtil.createTcpOpenFirewallRule(firewallRuleName, conf.getPort());
         } else {
             LOG.info("Firewall rule already exists: {}", firewallRuleName);
+        }
+    }
+
+    public static void removeFirewallRuleForPostgresqlConnections(PostgresqlDbaConf conf) throws IOException {
+        String firewallRuleName = conf.getFirewallRuleName();
+        if (!WindowsUtil.firewallRuleExists(firewallRuleName)) {
+            LOG.info("Firewall rule does not exist: {}", firewallRuleName);
+        } else {
+            LOG.info("Removing firewall rule: {}", firewallRuleName);
+            WindowsUtil.removeFirewallRule(firewallRuleName, conf.getPort());
         }
     }
 }
