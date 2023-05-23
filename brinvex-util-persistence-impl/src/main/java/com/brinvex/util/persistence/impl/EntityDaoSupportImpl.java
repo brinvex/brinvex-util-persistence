@@ -118,6 +118,20 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
     }
 
     @Override
+    public <ENTITY, ID extends Serializable> ENTITY findByIdForUpdateSkipLocked(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            ID id,
+            SingularAttribute<? super ENTITY, ID> idAttribute
+    ) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<ENTITY> q = cb.createQuery(entityType);
+        Root<ENTITY> r = q.from(entityType);
+        q.where(cb.equal(r.get(idAttribute), id));
+        return getFirstResultForUpdateSkipLocked(em, q);
+    }
+
+    @Override
     public <ENTITY, ID extends Serializable> ENTITY getReference(
             EntityManager em, Class<ENTITY> entityType, ID id
     ) {

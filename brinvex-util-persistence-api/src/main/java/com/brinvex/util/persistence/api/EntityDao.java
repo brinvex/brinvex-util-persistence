@@ -29,6 +29,8 @@ public interface EntityDao<ENTITY, ID extends Serializable> {
         return findByIdAndVersion(id, (short) optLockVersion, optLockVersionGetter);
     }
 
+    ENTITY findByIdForUpdateSkipLocked(ID id);
+
     ENTITY getReference(ID id);
 
     <OTHER_ENTITY, OTHER_ID extends Serializable> OTHER_ENTITY getReference(

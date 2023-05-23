@@ -105,6 +105,11 @@ public abstract class AbstractEntityDao<ENTITY, ID extends Serializable> impleme
     }
 
     @Override
+    public ENTITY findByIdForUpdateSkipLocked(ID id) {
+        return daoSupport.findByIdForUpdateSkipLocked(em(), entityType, id, idAttribute());
+    }
+
+    @Override
     public ENTITY getReference(ID id) {
         return daoSupport.getReference(em(), entityType, id);
     }

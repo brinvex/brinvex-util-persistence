@@ -15,6 +15,9 @@
  */
 package com.brinvex.util.persistence.dba.postgresql;
 
+import com.brinvex.util.persistence.dba.api.DbaConf;
+import com.brinvex.util.persistence.dba.api.DbaInstallConf;
+import com.brinvex.util.persistence.dba.api.DbaManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.slf4j.Logger;
@@ -23,26 +26,37 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-public class PostgresqlDbaUtilTest {
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    private static final Logger LOG = LoggerFactory.getLogger(PostgresqlDbaUtilTest.class);
+public class PostgresqlDbaTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PostgresqlDbaTest.class);
 
     @EnabledIfSystemProperty(named = "enableHostSystemAffectingTests", matches = "true")
     @Test
-    public void install_uninstall() throws IOException {
+    public void all() throws IOException {
         Path testBasePath = Paths.get("c:/prj/brinvex/brinvex-util/brinvex-util-persistence/BrinvexDbaTest");
-        PostgresqlDbaConf conf = new PostgresqlDbaConf()
-                .setName("BrinvexDbaTest")
-                .setPgHomePath(testBasePath.resolve("postgresql"))
-                .setSuperPass("S3cr3t!123")
+
+        String appUser = "bx_app1_user1";
+        String appDb = "bx_app1";
+
+        DbaConf baseConf = new DbaConf()
                 .setPort(5431)
+                .setSuperPass("S3cr3t!123")
+                .setDbHomePath(testBasePath.resolve("postgresql"));
+
+        DbaInstallConf installConf = new DbaInstallConf(baseConf)
+                .setEnvName("BrinvexDbaTest")
                 .setInstallerPath(testBasePath.resolve("install/postgresql-15.2-1-windows-x64.exe"))
                 .addAllowedClientAddresses(List.of("192.168.0.0/16", "172.17.0.0/16"))
                 .addExtensions(List.of("btree_gist"))
-                .addAppUsers(Map.of("bx_app_user", "bx_app_user_123"))
+                .addAppUsers(Map.of(appUser, "bx_app_user1_123"))
+                .addAppDatabases(Map.of(appDb, appUser))
                 .addSystemSettings(List.of(
                         "max_connections = '100'",
                         "max_prepared_transactions = '100'",
@@ -62,19 +76,29 @@ public class PostgresqlDbaUtilTest {
                         "max_parallel_maintenance_workers = '4'"
                 ));
 
-        LOG.debug("install - {}", conf);
+        DbaManager dbaManager = new PostgresqlDbaManager();
+
+        LOG.debug("uninstall - cleaning mess from previous runs - {}", installConf);
+        dbaManager.uninstall(installConf);
+
+        LOG.debug("install - {}", installConf);
+        dbaManager.install(installConf);
+
+        Path backupToRestore = testBasePath.resolve("db-bck/bx_app1-test-in.backup");
         try {
-            PostgresqlDbaUtil.install(conf);
-        } catch (Exception e) {
-            LOG.info("Starting cleaning after install failed");
-            try {
-                PostgresqlDbaUtil.uninstall(conf);
-                LOG.info("Cleaning successful");
-            } catch (Exception e2) {
-                LOG.warn("Cleaning failed - do it manually!!!", e);
-            }
-            throw e;
+            dbaManager.restoreDatabase(baseConf, backupToRestore, appDb, appUser);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().startsWith("Database already exists"));
         }
-        PostgresqlDbaUtil.uninstall(conf);
+        dbaManager.backupAndDropDatabase(baseConf, appDb);
+        dbaManager.restoreDatabase(baseConf, backupToRestore, appDb, appUser);
+
+        String ts = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        Path backupPath = testBasePath.resolve(String.format("db-bck/%s-test-out-%s.backup", appDb, ts));
+        dbaManager.backupDatabase(baseConf, appDb, backupPath);
+
+        LOG.debug("uninstall - {}", installConf);
+        dbaManager.uninstall(installConf);
     }
+
 }

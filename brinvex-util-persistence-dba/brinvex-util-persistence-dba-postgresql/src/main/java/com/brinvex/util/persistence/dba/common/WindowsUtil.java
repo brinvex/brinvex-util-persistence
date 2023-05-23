@@ -81,7 +81,7 @@ public class WindowsUtil {
         }
     }
 
-    public static void removeFirewallRule(String ruleName, int localPort) throws IOException {
+    public static void removeFirewallRule(String ruleName) throws IOException {
         OsCmdResult r = OsCmdUtil.exec(String.format(
                 "netsh advfirewall firewall delete rule name=\"%s\"", ruleName));
         if (!"Deleted 1 rule(s).Ok.".equals(r.getOut())) {

@@ -56,6 +56,13 @@ public interface EntityDaoSupport {
             List<SingularAttribute<ENTITY, ?>> constructorParameters
     );
 
+    <ENTITY, ID extends Serializable> ENTITY findByIdForUpdateSkipLocked(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            ID id,
+            SingularAttribute<? super ENTITY, ID> idAttribute
+    );
+
     <ENTITY, ID extends Serializable> ENTITY getReference(
             EntityManager em, Class<ENTITY> entityType, ID id
     );
@@ -149,7 +156,12 @@ public interface EntityDaoSupport {
             Path<LocalDateTime> leftAttribute, Path<LocalDateTime> rightAttribute, LocalDateTime testDate
     );
 
-    <T extends Number> Expression<T> sum(CriteriaBuilder cb, Expression<T> expression1, Expression<T> expression2, Expression<T> expression3);
+    <T extends Number> Expression<T> sum(
+            CriteriaBuilder cb,
+            Expression<T> expression1,
+            Expression<T> expression2,
+            Expression<T> expression3
+    );
 
     Expression<Integer> least(CriteriaBuilder cb, Integer literal1, Expression<Integer> expression2);
 

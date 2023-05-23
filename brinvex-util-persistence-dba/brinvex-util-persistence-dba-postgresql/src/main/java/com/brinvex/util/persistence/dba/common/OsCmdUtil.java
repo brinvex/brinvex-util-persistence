@@ -41,24 +41,24 @@ public class OsCmdUtil {
         Process process = envs.isEmpty() ? runtime.exec(cmdParts) : runtime.exec(cmdParts, envs.toArray(String[]::new));
 
         StringBuilder outSb = new StringBuilder();
-        BufferedReader outReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        outReader.lines().forEach(s -> {
-            LOG.trace("cmdOut: {}", s);
-            if (!s.isBlank()) {
-                outSb.append(s);
-            }
-        });
-        outReader.close();
+        try (BufferedReader outReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            outReader.lines().forEach(s -> {
+                LOG.trace("cmdOut: {}", s);
+                if (!s.isBlank()) {
+                    outSb.append(s);
+                }
+            });
+        }
 
         StringBuilder errSb = new StringBuilder();
-        BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        errReader.lines().forEach(s -> {
-            LOG.trace("cmdErr: {}", s);
-            if (!s.isBlank()) {
-                errSb.append(s);
-            }
-        });
-        errReader.close();
+        try (BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            errReader.lines().forEach(s -> {
+                LOG.trace("cmdErr: {}", s);
+                if (!s.isBlank()) {
+                    errSb.append(s);
+                }
+            });
+        }
 
         return new OsCmdResult(outSb.toString(), errSb.toString());
     }
