@@ -253,6 +253,8 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
             @SuppressWarnings("unchecked")
             Selection<? extends R> typedSelection = (Selection<? extends R>) selections.iterator().next();
             return q.select(typedSelection);
+        } else if (resultType.isArray()){
+            return q.multiselect(selections.toArray(Selection[]::new));
         } else {
             return q.select(cb.construct(resultType, selections.toArray(Selection[]::new)));
         }

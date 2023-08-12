@@ -11,7 +11,7 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-entity-api</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
 </dependency>
 ````
 - Compile and runtime dependencies intended for DAO classes
@@ -19,12 +19,12 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-api</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
 </dependency>
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-impl</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
     <scope>runtime</scope>
 </dependency>
 ````
@@ -33,7 +33,7 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-dba-postgresql</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.3</version>
 </dependency>
 ````
 
