@@ -17,11 +17,14 @@ package com.brinvex.util.persistence.api;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 public interface EntityDao<ENTITY, ID extends Serializable> {
 
     ENTITY findById(ID id);
+
+    List<ENTITY> findByIds(Collection<ID> ids);
 
     ENTITY findByIdAndVersion(ID id, short optLockVersion, Function<ENTITY, Short> optLockVersionGetter);
 

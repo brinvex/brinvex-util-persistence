@@ -72,6 +72,20 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
     }
 
     @Override
+    public <ENTITY, ID extends Serializable> List<ENTITY> findByIds(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            Collection<ID> ids,
+            SingularAttribute<? super ENTITY, ID> idAttribute
+    ) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<ENTITY> q = cb.createQuery(entityType);
+        Root<ENTITY> r = q.from(entityType);
+        q.where(inCollection(cb, r.get(idAttribute), ids));
+        return getResults(em, q);
+    }
+
+    @Override
     public <ENTITY, ID extends Serializable> ENTITY findByIdAndVersion(
             EntityManager em,
             Class<ENTITY> entityType,

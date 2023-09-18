@@ -39,6 +39,13 @@ public interface EntityDaoSupport {
 
     <ENTITY, ID extends Serializable> ENTITY findById(EntityManager em, Class<ENTITY> entityType, ID id);
 
+    <ENTITY, ID extends Serializable> List<ENTITY> findByIds(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            Collection<ID> ids,
+            SingularAttribute<? super ENTITY, ID> idAttribute
+    );
+
     <ENTITY, ID extends Serializable> ENTITY findByIdAndVersion(
             EntityManager em,
             Class<ENTITY> entityType,
