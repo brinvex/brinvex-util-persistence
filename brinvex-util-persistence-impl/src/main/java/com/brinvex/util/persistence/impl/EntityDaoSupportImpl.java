@@ -253,7 +253,7 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
             @SuppressWarnings("unchecked")
             Selection<? extends R> typedSelection = (Selection<? extends R>) selections.iterator().next();
             return q.select(typedSelection);
-        } else if (resultType.isArray()){
+        } else if (resultType.isArray()) {
             return q.multiselect(selections.toArray(Selection[]::new));
         } else {
             return q.select(cb.construct(resultType, selections.toArray(Selection[]::new)));
@@ -512,10 +512,16 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
     ) {
         if (filterItems == null) {
             return cb.conjunction();
-        } else if (filterItems.isEmpty()) {
-            return cb.disjunction();
         } else {
-            return attribute.in(filterItems);
+            int size = filterItems.size();
+            switch (size) {
+                case 0:
+                    return cb.disjunction();
+                case 1:
+                    return cb.equal(attribute, filterItems.iterator().next());
+                default:
+                    return attribute.in(filterItems);
+            }
         }
     }
 
