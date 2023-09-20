@@ -34,6 +34,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.metamodel.SingularAttribute;
 import org.hibernate.LockMode;
+import org.hibernate.Session;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.Database;
 import org.hibernate.dialect.Dialect;
@@ -64,11 +65,40 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
     private static final Map<String, Database> PU_2_DATABASE = new ConcurrentHashMap<>();
 
     @Override
-    public <ENTITY, ID extends Serializable> ENTITY findById(EntityManager em, Class<ENTITY> entityType, ID id) {
+    public <ENTITY, ID extends Serializable> ENTITY getById(EntityManager em, Class<ENTITY> entityType, ID id) {
         if (id == null) {
             throw new IllegalArgumentException("Required non-null id");
         }
         return em.find(entityType, id);
+    }
+
+    @Override
+    public <ENTITY, ID extends Serializable> ENTITY getByIdForUpdate(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            ID id,
+            Duration lockTimeout
+    ) {
+        if (id == null) {
+            throw new IllegalArgumentException("Required non-null id");
+        }
+        setTransactionScopedLockTimeout(em, lockTimeout);
+        ENTITY entity = em.find(entityType, id, LockModeType.PESSIMISTIC_WRITE);
+        setTransactionScopedLockTimeout(em, Duration.ZERO);
+        return entity;
+    }
+
+    @Override
+    public <ENTITY, ID extends Serializable> ENTITY getByIdForUpdateSkipLocked(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            ID id
+    ) {
+        if (id == null) {
+            throw new IllegalArgumentException("Required non-null id");
+        }
+        Session hibSession = em.unwrap(Session.class);
+        return hibSession.get(entityType, id, LockMode.UPGRADE_SKIPLOCKED);
     }
 
     @Override
@@ -86,14 +116,14 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
     }
 
     @Override
-    public <ENTITY, ID extends Serializable> ENTITY findByIdAndVersion(
+    public <ENTITY, ID extends Serializable> ENTITY getByIdAndCheckVersion(
             EntityManager em,
             Class<ENTITY> entityType,
             ID id,
             short optLockVersion,
             Function<ENTITY, Short> optLockVersionGetter
     ) {
-        ENTITY ent = findById(em, entityType, id);
+        ENTITY ent = getById(em, entityType, id);
         if (ent == null) {
             return null;
         }
@@ -129,20 +159,6 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
         q.select(cb.construct(dtoType, array));
 
         return getFirstResult(em, q);
-    }
-
-    @Override
-    public <ENTITY, ID extends Serializable> ENTITY findByIdForUpdateSkipLocked(
-            EntityManager em,
-            Class<ENTITY> entityType,
-            ID id,
-            SingularAttribute<? super ENTITY, ID> idAttribute
-    ) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<ENTITY> q = cb.createQuery(entityType);
-        Root<ENTITY> r = q.from(entityType);
-        q.where(cb.equal(r.get(idAttribute), id));
-        return getFirstResultForUpdateSkipLocked(em, q);
     }
 
     @Override

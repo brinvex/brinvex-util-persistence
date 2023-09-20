@@ -95,23 +95,28 @@ public abstract class AbstractEntityDao<ENTITY, ID extends Serializable> impleme
     }
 
     @Override
-    public ENTITY findById(ID id) {
-        return daoSupport.findById(em(), entityType, id);
+    public ENTITY getById(ID id) {
+        return daoSupport.getById(em(), entityType, id);
+    }
+
+    @Override
+    public ENTITY getByIdForUpdate(ID id, Duration lockDuration) {
+        return daoSupport.getByIdForUpdate(em(), entityType, id, lockDuration);
+    }
+
+    @Override
+    public ENTITY getByIdForUpdateSkipLocked(ID id) {
+        return daoSupport.getByIdForUpdateSkipLocked(em(), entityType, id);
+    }
+
+    @Override
+    public ENTITY getByIdAndCheckVersion(ID id, short optLockVersion, Function<ENTITY, Short> optLockVersionGetter) {
+        return daoSupport.getByIdAndCheckVersion(em(), entityType, id, optLockVersion, optLockVersionGetter);
     }
 
     @Override
     public List<ENTITY> findByIds(Collection<ID> ids) {
         return daoSupport.findByIds(em(), entityType, ids, idAttribute());
-    }
-
-    @Override
-    public ENTITY findByIdAndVersion(ID id, short optLockVersion, Function<ENTITY, Short> optLockVersionGetter) {
-        return daoSupport.findByIdAndVersion(em(), entityType, id, optLockVersion, optLockVersionGetter);
-    }
-
-    @Override
-    public ENTITY findByIdForUpdateSkipLocked(ID id) {
-        return daoSupport.findByIdForUpdateSkipLocked(em(), entityType, id, idAttribute());
     }
 
     @Override

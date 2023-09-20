@@ -16,23 +16,26 @@
 package com.brinvex.util.persistence.api;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
 public interface EntityDao<ENTITY, ID extends Serializable> {
 
-    ENTITY findById(ID id);
+    ENTITY getById(ID id);
 
-    List<ENTITY> findByIds(Collection<ID> ids);
+    ENTITY getByIdForUpdate(ID id, Duration lockDuration);
 
-    ENTITY findByIdAndVersion(ID id, short optLockVersion, Function<ENTITY, Short> optLockVersionGetter);
+    ENTITY getByIdForUpdateSkipLocked(ID id);
 
-    default ENTITY findByIdAndVersion(ID id, int optLockVersion, Function<ENTITY, Short> optLockVersionGetter) {
-        return findByIdAndVersion(id, (short) optLockVersion, optLockVersionGetter);
+    ENTITY getByIdAndCheckVersion(ID id, short optLockVersion, Function<ENTITY, Short> optLockVersionGetter);
+
+    default ENTITY getByIdAndCheckVersion(ID id, int optLockVersion, Function<ENTITY, Short> optLockVersionGetter) {
+        return getByIdAndCheckVersion(id, (short) optLockVersion, optLockVersionGetter);
     }
 
-    ENTITY findByIdForUpdateSkipLocked(ID id);
+    List<ENTITY> findByIds(Collection<ID> ids);
 
     ENTITY getReference(ID id);
 

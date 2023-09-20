@@ -21,6 +21,7 @@ import com.brinvex.util.persistence.impl.test.dm.Salary;
 import com.brinvex.util.persistence.impl.test.infra.AbstractTest;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.PessimisticLockException;
 import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -174,7 +175,7 @@ public class EntityDaoTest extends AbstractTest {
 
         Salary p2 = doInTx(em -> {
             SalaryDao salaryDao = new SalaryDao(em);
-            return salaryDao.findById(salaryId);
+            return salaryDao.getById(salaryId);
         });
         assertNotNull(p2);
         assertEquals(salaryId, p2.getId());
@@ -254,8 +255,8 @@ public class EntityDaoTest extends AbstractTest {
         doInTx(em -> {
             EmployeeDao employeeDao = new EmployeeDao(em);
 
-            Employee s1 = employeeDao.findById(this.emp1.getId());
-            Employee s2 = employeeDao.findById(this.emp2.getId());
+            Employee s1 = employeeDao.getById(this.emp1.getId());
+            Employee s2 = employeeDao.getById(this.emp2.getId());
             {
                 Integer d = employeeDao.findValidFromDayDiff(s1.getId(), s1.getId());
                 assertEquals(0, d);
@@ -330,8 +331,43 @@ public class EntityDaoTest extends AbstractTest {
                 LOG.debug("before thread2-findForUpdate");
                 Salary salary = salaryDao.findForUpdate(emp1.getId(), salary1_1.getDate(), Duration.ofSeconds(2));
                 LOG.debug("after thread2-findForUpdate - result: {}", salary);
-                fail("Expecting lock timeout exception");
+                fail("Expecting LockTimeoutException");
             } catch (LockTimeoutException e) {
+                LOG.debug("after failed thread2-findForUpdate - expected exception: {}", e.getMessage());
+            }
+            return null;
+        });
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        List<Future<Object>> futures = executorService.invokeAll(List.of(c1, c2));
+        for (Future<Object> future : futures) {
+            future.get();
+        }
+    }
+
+    @Test
+    void getForUpdate() throws InterruptedException, ExecutionException {
+
+        Callable<Object> c1 = () -> doInTx(em -> {
+            SalaryDao salaryDao = new SalaryDao(em);
+            LOG.debug("before thread1-findForUpdate");
+            Salary salary = salaryDao.getByIdForUpdate(salary1_1.getId(), Duration.ofSeconds(2));
+            LOG.debug("after thread1-findForUpdate - result: {}", salary);
+            sleep(5);
+            LOG.debug("after thread1 sleep");
+            return null;
+        });
+
+        Callable<Object> c2 = () -> doInTx(em -> {
+            sleep(1);
+            LOG.debug("after thread2 sleep");
+            SalaryDao salaryDao = new SalaryDao(em);
+            try {
+                LOG.debug("before thread2-findForUpdate");
+                Salary salary = salaryDao.getByIdForUpdate(salary1_1.getId(), Duration.ofSeconds(2));
+                LOG.debug("after thread2-findForUpdate - result: {}", salary);
+                fail("Expecting PessimisticLockException");
+            } catch (PessimisticLockException e) {
                 LOG.debug("after failed thread2-findForUpdate - expected exception: {}", e.getMessage());
             }
             return null;
@@ -380,25 +416,25 @@ public class EntityDaoTest extends AbstractTest {
         {
             doInTx(em -> {
                 EmployeeDao employeeDao = new EmployeeDao(em);
-                Employee s1 = employeeDao.findById(emp1.getId());
+                Employee s1 = employeeDao.getById(emp1.getId());
                 assertEquals(0, s1.getVersion());
             });
             doInTx(em -> {
                 EmployeeDao employeeDao = new EmployeeDao(em);
-                Employee s1 = employeeDao.findById(emp1.getId());
+                Employee s1 = employeeDao.getById(emp1.getId());
                 assertEquals(0, s1.getVersion());
                 s1.setValidFrom(s1.getValidFrom().minusDays(1));
             });
             doInTx(em -> {
                 EmployeeDao employeeDao = new EmployeeDao(em);
-                Employee s1 = employeeDao.findById(emp1.getId());
+                Employee s1 = employeeDao.getById(emp1.getId());
                 assertEquals(1, s1.getVersion());
                 s1.setValidFrom(s1.getValidFrom().minusDays(1));
             });
             doInTx(em -> {
                 EmployeeDao employeeDao = new EmployeeDao(em);
                 try {
-                    employeeDao.findByIdAndVersion(emp1.getId(), emp1.getVersion(), Employee::getVersion);
+                    employeeDao.getByIdAndCheckVersion(emp1.getId(), emp1.getVersion(), Employee::getVersion);
                 } catch (OptimisticLockException e) {
                     LOG.debug("Expecting exception: {}", e.getMessage());
                 }

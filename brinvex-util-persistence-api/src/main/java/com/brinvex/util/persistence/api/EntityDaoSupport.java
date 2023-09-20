@@ -37,21 +37,34 @@ import java.util.function.Function;
 
 public interface EntityDaoSupport {
 
-    <ENTITY, ID extends Serializable> ENTITY findById(EntityManager em, Class<ENTITY> entityType, ID id);
+    <ENTITY, ID extends Serializable> ENTITY getById(EntityManager em, Class<ENTITY> entityType, ID id);
+
+    <ENTITY, ID extends Serializable> ENTITY getByIdForUpdate(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            ID id,
+            Duration lockTimeout
+    );
+
+    <ENTITY, ID extends Serializable> ENTITY getByIdForUpdateSkipLocked(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            ID id
+    );
+
+    <ENTITY, ID extends Serializable> ENTITY getByIdAndCheckVersion(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            ID id,
+            short optLockVersion,
+            Function<ENTITY, Short> optLockVersionGetter
+    );
 
     <ENTITY, ID extends Serializable> List<ENTITY> findByIds(
             EntityManager em,
             Class<ENTITY> entityType,
             Collection<ID> ids,
             SingularAttribute<? super ENTITY, ID> idAttribute
-    );
-
-    <ENTITY, ID extends Serializable> ENTITY findByIdAndVersion(
-            EntityManager em,
-            Class<ENTITY> entityType,
-            ID id,
-            short optLockVersion,
-            Function<ENTITY, Short> optLockVersionGetter
     );
 
     <ENTITY, ID, DTO> DTO findByIdAsDTO(
@@ -63,12 +76,6 @@ public interface EntityDaoSupport {
             List<SingularAttribute<ENTITY, ?>> constructorParameters
     );
 
-    <ENTITY, ID extends Serializable> ENTITY findByIdForUpdateSkipLocked(
-            EntityManager em,
-            Class<ENTITY> entityType,
-            ID id,
-            SingularAttribute<? super ENTITY, ID> idAttribute
-    );
 
     <ENTITY, ID extends Serializable> ENTITY getReference(
             EntityManager em, Class<ENTITY> entityType, ID id

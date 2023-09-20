@@ -16,6 +16,7 @@
             <property name="jakarta.persistence.jdbc.password" value="postgres123"/>
             <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
 
+            <property name="hibernate.format_sql" value="true"/>
         </properties>
 
     </persistence-unit>
