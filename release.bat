@@ -18,3 +18,10 @@ git push --follow-tags
 call %MVN% -P release -Darguments=-DskipTests release:perform
 
 echo Continue on https://s01.oss.sonatype.org/
+echo https://s01.oss.sonatype.org/
+echo Login (user: brinvex)
+echo Staging Repositories
+echo Refresh Close Refresh Release
+echo After cca 10-60 minutes, check: https://repo.maven.apache.org/maven2/com/brinvex/util/brinvex-util-revolut/
+echo After cca 4 hours, check: https://search.maven.org/search?q=brinvex-util-revolut
+echo After cca 24 hours, check: https://mvnrepository.com/search?q=brinvex
