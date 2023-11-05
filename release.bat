@@ -13,8 +13,8 @@ REM Amend commit if there are some changes
 
 call %MVN% -P release -Darguments=-DskipTests release:clean release:prepare
 
-REM git push
+git push
 
-REM call %MVN% -P release -Darguments=-DskipTests release:perform
+call %MVN% -P release -Darguments=-DskipTests release:perform
 
-REM echo Continue on https://s01.oss.sonatype.org/
+echo Continue on https://s01.oss.sonatype.org/
