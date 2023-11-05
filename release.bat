@@ -13,7 +13,7 @@ REM Amend commit if there are some changes
 
 call %MVN% -P release -Darguments=-DskipTests release:clean release:prepare
 
-git push --tags
+git push --follow-tags
 
 call %MVN% -P release -Darguments=-DskipTests release:perform
 
