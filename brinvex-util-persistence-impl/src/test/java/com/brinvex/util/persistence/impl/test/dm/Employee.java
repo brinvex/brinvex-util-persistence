@@ -15,12 +15,16 @@
  */
 package com.brinvex.util.persistence.impl.test.dm;
 
+import com.brinvex.util.persistence.entityapi.converter.StringListConverter;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringJoiner;
 
 @Entity
@@ -36,12 +40,15 @@ public class Employee {
 
     private LocalDateTime validTo;
 
-    public Long getId() {
-        return id;
-    }
+    @Convert(converter = StringListConverter.class)
+    private List<String> phoneNumbers = new ArrayList<>();
 
     @Version
     private short version;
+
+    public Long getId() {
+        return id;
+    }
 
     public void setId(Long id) {
         this.id = id;
@@ -79,6 +86,14 @@ public class Employee {
         this.version = version;
     }
 
+    public List<String> getPhoneNumbers() {
+        return phoneNumbers;
+    }
+
+    public void setPhoneNumbers(List<String> phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", Employee.class.getSimpleName() + "[", "]")
@@ -87,6 +102,7 @@ public class Employee {
                 .add("validFrom=" + validFrom)
                 .add("validTo=" + validTo)
                 .add("version=" + version)
+                .add("phoneNumbers=" + phoneNumbers)
                 .toString();
     }
 }

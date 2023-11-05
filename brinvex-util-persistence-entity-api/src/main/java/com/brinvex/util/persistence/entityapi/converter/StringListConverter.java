@@ -21,7 +21,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CommaSeparatedStringListConverter implements AttributeConverter<List<String>, String> {
+/**
+ * Does not work well with Hibernate 6.3.
+ * Consider to use {@link StringArrayConverter}
+ * <br>
+ * See
+ * <a href="https://discourse.hibernate.org/t/criteria-api-query-involving-collection-attributeconverter-stopped-working-in-hibernate-orm-6-3/8504">
+ *          https://discourse.hibernate.org/t/criteria-api-query-involving-collection-attributeconverter-stopped-working-in-hibernate-orm-6-3/8504
+ * </a>
+ */
+@Deprecated
+public class StringListConverter implements AttributeConverter<List<String>, String> {
 
     private static final String DELIMITER = ",";
 

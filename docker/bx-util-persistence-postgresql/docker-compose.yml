@@ -22,7 +22,7 @@ volumes:
 services:
 
   bx-util-persistence-postgres:
-    image: postgres:15.2
+    image: postgres:16.0
     environment:
       POSTGRES_DB: brinvex_util_persistence
       POSTGRES_USER: postgres

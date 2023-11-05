@@ -80,7 +80,7 @@
         <logback-classic.version>1.4.5</logback-classic.version>
 
         <junit-jupiter.version>5.9.2</junit-jupiter.version>
-        <hibernate-orm.version>6.2.0.CR3</hibernate-orm.version>
+        <hibernate-orm.version>6.3.1.Final</hibernate-orm.version>
         <postgresql.version>42.5.4</postgresql.version>
 
 
@@ -94,6 +94,11 @@
             <dependency>
                 <groupId>com.brinvex.util</groupId>
                 <artifactId>brinvex-util-persistence-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.brinvex.util</groupId>
+                <artifactId>brinvex-util-persistence-entity-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

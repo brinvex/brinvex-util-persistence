@@ -17,11 +17,15 @@ package com.brinvex.util.persistence.impl.test;
 
 import com.brinvex.util.persistence.api.NumberFilter;
 import com.brinvex.util.persistence.impl.test.dm.Employee;
+import com.brinvex.util.persistence.impl.test.dm.Employee_;
 import com.brinvex.util.persistence.impl.test.dm.Salary;
 import com.brinvex.util.persistence.impl.test.infra.AbstractTest;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PessimisticLockException;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EntityDaoTest extends AbstractTest {
@@ -60,6 +65,7 @@ public class EntityDaoTest extends AbstractTest {
         emp1.setName("Alice");
         emp1.setValidFrom(parse("2023-01-01").atStartOfDay());
         emp1.setValidTo(parse("2200-01-01").atStartOfDay());
+        emp1.setPhoneNumbers(List.of("0911 111 111"));
 
         salary1_1 = new Salary();
         salary1_1.setEmployee(emp1);
@@ -80,6 +86,7 @@ public class EntityDaoTest extends AbstractTest {
         emp2.setName("Bob");
         emp2.setValidFrom(parse("2023-01-02").atStartOfDay());
         emp2.setValidTo(parse("2200-01-01").atStartOfDay());
+        emp2.setPhoneNumbers(List.of("0911 222 222", "0911 222 333"));
 
         salary2_1 = new Salary();
         salary2_1.setEmployee(emp2);
@@ -131,6 +138,7 @@ public class EntityDaoTest extends AbstractTest {
         });
         assertEquals(1, employees.size());
         assertEquals(emp1.getId(), employees.get(0).getId());
+        assertEquals(emp1.getPhoneNumbers(), employees.get(0).getPhoneNumbers());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -441,4 +449,43 @@ public class EntityDaoTest extends AbstractTest {
             });
         }
     }
+
+    @SuppressWarnings({"rawtypes"})
+    @Test
+    void collectionColumnConverter_jpql() {
+        doInTx(em -> {
+            Object phoneNumbers = em
+                    .createQuery("select emp.phoneNumbers from Employee emp where emp.id = :EMP_ID")
+                    .setParameter("EMP_ID", emp2.getId())
+                    .getSingleResult();
+
+            assertTrue(phoneNumbers instanceof List);
+            assertTrue(((List) phoneNumbers).get(0) instanceof String);
+            assertEquals(emp2.getPhoneNumbers(), phoneNumbers);
+        });
+    }
+
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    void collectionColumnConverter_criteria() {
+        doInTx(em -> {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<List> q = cb.createQuery(List.class);
+            Root<Employee> r = q.from(Employee.class);
+            q.select(r.get(Employee_.phoneNumbers));
+            q.where(cb.equal(r.get(Employee_.id), emp2.getId()));
+            List<Object> phoneNumbers = em.createQuery(q).getSingleResult();
+
+            if  (phoneNumbers.get(0) instanceof String) {
+                // Holds for Hibernate <= 6.2
+                assertEquals(emp2.getPhoneNumbers(), phoneNumbers);
+            } else if (phoneNumbers.get(0) instanceof List) {
+                // Holds for Hibernate >= 6.3, but it seems as a bug
+                // https://discourse.hibernate.org/t/criteria-api-query-involving-collection-attributeconverter-stopped-working-in-hibernate-orm-6-3/8504
+                assertEquals(emp2.getPhoneNumbers(), phoneNumbers.get(0));
+            }
+        });
+    }
+
 }

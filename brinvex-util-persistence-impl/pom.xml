@@ -53,6 +53,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.brinvex.util</groupId>
+            <artifactId>brinvex-util-persistence-entity-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jpamodelgen</artifactId>
             <scope>test</scope>
