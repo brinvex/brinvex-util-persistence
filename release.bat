@@ -18,7 +18,6 @@ git push --follow-tags
 call %MVN% -P release -Darguments=-DskipTests release:perform
 
 echo Continue on https://s01.oss.sonatype.org/
-echo https://s01.oss.sonatype.org/
 echo Login (user: brinvex)
 echo Staging Repositories
 echo Refresh Close Refresh Release
