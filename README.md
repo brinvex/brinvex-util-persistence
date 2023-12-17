@@ -19,12 +19,12 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-api</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.3</version>
 </dependency>
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-impl</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.3</version>
     <scope>runtime</scope>
 </dependency>
 ````
@@ -33,7 +33,7 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-dba-postgresql</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.3</version>
 </dependency>
 ````
 
@@ -41,8 +41,8 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 
 | Brinvex-Util-Persistence | Java                                                       | Hibernate ORM | 
 |--------------------------|------------------------------------------------------------|---------------|
-| 1.3.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**     | 6.2           | 
 | 1.4.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**     | 6.2, 6.3      | 
+| 1.5.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**     | 6.2, 6.3      | 
 
 - **requires Hibernate ORM**
 - can be used in Spring based applications

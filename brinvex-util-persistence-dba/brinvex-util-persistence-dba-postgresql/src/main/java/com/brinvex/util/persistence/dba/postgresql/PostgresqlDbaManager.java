@@ -69,11 +69,11 @@ public class PostgresqlDbaManager implements DbaManager {
 
         alterSystemSettings(baseConf, conf.getSystemSettings());
 
-        installDbExtensions(baseConf, conf.getDbExtensions());
-
         createAppDbUsers(baseConf, conf.getAppUsers());
 
         createAppDatabases(baseConf, conf.getAppDatabases());
+
+        installDbExtensions(baseConf, conf.getAppDatabases(), conf.getAppUsers(), conf.getDbExtensions());
 
         createFirewallRule(baseConf, conf.getFirewallRuleName());
 
@@ -290,23 +290,33 @@ public class PostgresqlDbaManager implements DbaManager {
         }
     }
 
-    private void installDbExtensions(DbaConf conf, Set<String> extensions) throws IOException {
+    @SuppressWarnings("UnnecessaryLocalVariable")
+    private void installDbExtensions(
+            DbaConf conf,
+            Map<String, String> appDatabases,
+            Map<String, String> appUsers,
+            Set<String> extensions
+    ) throws IOException {
         if (extensions.isEmpty()) {
             LOG.info("No PG extensions to create");
         } else {
-            for (String extension : extensions) {
-                LOG.info("Creating PG extension (if not exists): {}", extension);
-                String psqlCmd = format("CREATE EXTENSION IF NOT EXISTS %s;", extension);
-                OsCmdResult r = executePsqlSuperCommand(conf, psqlCmd);
+            for (String appDb : appDatabases.keySet()) {
+                String appUser = appDb;
+                String appPwd = appUsers.get(appDb);
+                for (String extension : extensions) {
+                    LOG.info("Creating PG extension in DB {} (if not exists): {}", appDb, extension);
+                    String psqlCmd = format("CREATE EXTENSION IF NOT EXISTS %s;", extension);
+                    OsCmdResult r = executePsqlAppUserCommand(conf, psqlCmd, appUser, appPwd, appDb);
 
-                String expectedOut = "CREATE EXTENSION";
-                boolean outIsOk = expectedOut.equals(r.getOut());
+                    String expectedOut = "CREATE EXTENSION";
+                    boolean outIsOk = expectedOut.equals(r.getOut());
 
-                String expectedErr = format("NOTICE:  extension \"%s\" already exists, skipping", extension);
-                boolean errIsOk = r.getErr().isBlank() || expectedErr.equals(r.getErr());
+                    String expectedErr = format("NOTICE:  extension \"%s\" already exists, skipping", extension);
+                    boolean errIsOk = r.getErr().isBlank() || expectedErr.equals(r.getErr());
 
-                if (!outIsOk || !errIsOk) {
-                    throw new IllegalStateException(format("PG command failed: %s, %s", psqlCmd, r));
+                    if (!outIsOk || !errIsOk) {
+                        throw new IllegalStateException(format("PG command failed: %s, %s", psqlCmd, r));
+                    }
                 }
             }
         }
@@ -373,14 +383,34 @@ public class PostgresqlDbaManager implements DbaManager {
             DbaConf conf,
             String psqlCmd
     ) throws IOException {
+        return executePsqlSuperCommand(conf, psqlCmd, "postgres");
+    }
+
+    private OsCmdResult executePsqlSuperCommand(
+            DbaConf conf,
+            String psqlCmd,
+            String db
+    ) throws IOException {
         var psqlPath = conf.getDbToolsPath().resolve("psql");
         var host = conf.getHost();
         var port = conf.getPort();
         var user = conf.getSuperUser();
         var pass = conf.getSuperPass();
-        return executePsqlCommand(psqlPath, host, port, "postgres", user, pass, psqlCmd);
+        return executePsqlCommand(psqlPath, host, port, db, user, pass, psqlCmd);
     }
 
+    private OsCmdResult executePsqlAppUserCommand(
+            DbaConf conf,
+            String psqlCmd,
+            String user,
+            String pass,
+            String db
+    ) throws IOException {
+        var psqlPath = conf.getDbToolsPath().resolve("psql");
+        var host = conf.getHost();
+        var port = conf.getPort();
+        return executePsqlCommand(psqlPath, host, port, db, user, pass, psqlCmd);
+    }
 
     private void startDbWinService(String winServiceName) throws IOException {
         if (WindowsUtil.winServiceIsRunning(winServiceName)) {
