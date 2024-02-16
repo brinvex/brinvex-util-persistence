@@ -11,7 +11,7 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-entity-api</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.3</version>
 </dependency>
 ````
 - Compile and runtime dependencies intended for DAO classes
