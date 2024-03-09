@@ -628,6 +628,7 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
     /*
      * Todo Normal - Create portable implementation of InternalDaoImpl#epochSeconds
      *  - waiting for Hibernate version newer than 6.2
+     * https://docs.jboss.org/hibernate/orm/6.4/querylanguage/html_single/Hibernate_Query_Language.html#functions-datetime
      */
     @Override
     public Expression<Integer> epochSeconds(

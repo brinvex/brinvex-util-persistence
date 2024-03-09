@@ -42,7 +42,7 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 | Brinvex-Util-Persistence | Java                                                       | Hibernate ORM | 
 |--------------------------|------------------------------------------------------------|---------------|
 | 1.4.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**     | 6.2, 6.3      | 
-| 1.5.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**     | 6.2, 6.3      | 
+| 1.5.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**     | 6.2, 6.3, 6.4 | 
 
 - **requires Hibernate ORM**
 - can be used in Spring based applications

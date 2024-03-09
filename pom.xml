@@ -76,12 +76,12 @@
 
         <jakarta.persistence-api.version>3.1.0</jakarta.persistence-api.version>
 
-        <slf4j.version>2.0.6</slf4j.version>
-        <logback-classic.version>1.4.5</logback-classic.version>
+        <slf4j.version>2.0.12</slf4j.version>
+        <logback-classic.version>1.4.14</logback-classic.version>
 
-        <junit-jupiter.version>5.9.2</junit-jupiter.version>
-        <hibernate-orm.version>6.3.1.Final</hibernate-orm.version>
-        <postgresql.version>42.5.4</postgresql.version>
+        <junit-jupiter.version>5.10.2</junit-jupiter.version>
+        <hibernate-orm.version>6.4.4.Final</hibernate-orm.version>
+        <postgresql.version>42.6.1</postgresql.version>
 
 
         <rootDir>${project.basedir}</rootDir>
