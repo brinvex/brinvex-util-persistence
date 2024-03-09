@@ -21,7 +21,7 @@
 
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence</artifactId>
-    <version>1.5.4-SNAPSHOT</version>
+    <version>1.5.4</version>
     <packaging>pom</packaging>
 
     <name>Brinvex-Util-Persistence</name>
@@ -51,7 +51,7 @@
         <connection>scm:git:https://github.com:brinvex/brinvex-util-persistence.git</connection>
         <developerConnection>scm:git:https://github.com/brinvex/brinvex-util-persistence.git</developerConnection>
         <url>scm:git:https://github.com/brinvex/brinvex-util-persistence/tree/master</url>
-        <tag>HEAD</tag>
+        <tag>brinvex-util-persistence-1.5.4</tag>
     </scm>
 
     <modules>
