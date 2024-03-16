@@ -83,6 +83,8 @@ public interface EntityDaoSupport {
 
     <ENTITY> void persist(EntityManager em, ENTITY entity);
 
+    <ENTITY> ENTITY merge(EntityManager em, ENTITY entity);
+
     <ENTITY> void detach(EntityManager em, ENTITY entity);
 
     void flush(EntityManager em);

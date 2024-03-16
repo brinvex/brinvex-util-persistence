@@ -180,6 +180,14 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
     }
 
     @Override
+    public <ENTITY> ENTITY merge(EntityManager em, ENTITY entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("Required non-null entity");
+        }
+        return em.merge(entity);
+    }
+
+    @Override
     public <ENTITY> void detach(EntityManager em, ENTITY entity) {
         em.detach(entity);
     }

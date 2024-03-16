@@ -46,6 +46,8 @@ public interface EntityDao<ENTITY, ID extends Serializable> {
 
     void persist(ENTITY entity);
 
+    ENTITY merge(ENTITY entity);
+
     void detach(ENTITY entity);
 
     void flush();

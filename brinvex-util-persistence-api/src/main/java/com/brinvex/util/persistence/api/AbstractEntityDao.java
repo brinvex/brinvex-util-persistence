@@ -142,6 +142,11 @@ public abstract class AbstractEntityDao<ENTITY, ID extends Serializable> impleme
     }
 
     @Override
+    public ENTITY merge(ENTITY entity) {
+        return support.merge(em(), entity);
+    }
+
+    @Override
     public void detach(ENTITY entity) {
         support.detach(em(), entity);
     }
