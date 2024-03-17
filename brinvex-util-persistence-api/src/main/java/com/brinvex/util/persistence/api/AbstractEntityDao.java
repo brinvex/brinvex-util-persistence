@@ -119,6 +119,11 @@ public abstract class AbstractEntityDao<ENTITY, ID extends Serializable> impleme
     }
 
     @Override
+    public ENTITY getByIdAndCheckVersion(ID id, int optLockVersion, Function<ENTITY, Integer> optLockVersionGetter) {
+        return support.getByIdAndCheckVersion(em(), entityType, id, optLockVersion, optLockVersionGetter);
+    }
+
+    @Override
     public List<ENTITY> findByIds(Collection<ID> ids) {
         return support.findByIds(em(), entityType, ids, idAttribute());
     }

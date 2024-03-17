@@ -60,6 +60,14 @@ public interface EntityDaoSupport {
             Function<ENTITY, Short> optLockVersionGetter
     );
 
+    <ENTITY, ID extends Serializable> ENTITY getByIdAndCheckVersion(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            ID id,
+            int optLockVersion,
+            Function<ENTITY, Integer> optLockVersionGetter
+    );
+
     <ENTITY, ID extends Serializable> List<ENTITY> findByIds(
             EntityManager em,
             Class<ENTITY> entityType,

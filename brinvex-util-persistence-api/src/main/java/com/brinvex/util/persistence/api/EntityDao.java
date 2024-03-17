@@ -31,9 +31,7 @@ public interface EntityDao<ENTITY, ID extends Serializable> {
 
     ENTITY getByIdAndCheckVersion(ID id, short optLockVersion, Function<ENTITY, Short> optLockVersionGetter);
 
-    default ENTITY getByIdAndCheckVersion(ID id, int optLockVersion, Function<ENTITY, Short> optLockVersionGetter) {
-        return getByIdAndCheckVersion(id, (short) optLockVersion, optLockVersionGetter);
-    }
+    ENTITY getByIdAndCheckVersion(ID id, int optLockVersion, Function<ENTITY, Integer> optLockVersionGetter);
 
     List<ENTITY> findByIds(Collection<ID> ids);
 

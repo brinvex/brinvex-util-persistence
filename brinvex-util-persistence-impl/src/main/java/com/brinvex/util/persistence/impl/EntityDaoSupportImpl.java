@@ -123,6 +123,16 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
             short optLockVersion,
             Function<ENTITY, Short> optLockVersionGetter
     ) {
+        return getByIdAndCheckVersion(em, entityType, id, (int) optLockVersion, ent -> optLockVersionGetter.apply(ent).intValue());
+    }
+    @Override
+    public <ENTITY, ID extends Serializable> ENTITY getByIdAndCheckVersion(
+            EntityManager em,
+            Class<ENTITY> entityType,
+            ID id,
+            int optLockVersion,
+            Function<ENTITY, Integer> optLockVersionGetter
+    ) {
         ENTITY ent = getById(em, entityType, id);
         if (ent == null) {
             return null;
@@ -130,7 +140,7 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
         if (optLockVersionGetter == null) {
             throw new NullPointerException("optLockVersionGetter must be non-null");
         }
-        short currentOptLockVersion = optLockVersionGetter.apply(ent);
+        int currentOptLockVersion = optLockVersionGetter.apply(ent);
         if (currentOptLockVersion == optLockVersion) {
             return ent;
         } else {
