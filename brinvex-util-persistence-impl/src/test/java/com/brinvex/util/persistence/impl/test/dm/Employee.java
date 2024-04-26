@@ -15,16 +15,13 @@
  */
 package com.brinvex.util.persistence.impl.test.dm;
 
-import com.brinvex.util.persistence.entityapi.converter.StringListConverter;
-import jakarta.persistence.Convert;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.StringJoiner;
 
 @Entity
@@ -40,8 +37,9 @@ public class Employee {
 
     private LocalDateTime validTo;
 
-    @Convert(converter = StringListConverter.class)
-    private List<String> phoneNumbers = new ArrayList<>();
+    @SuppressWarnings("JpaAttributeTypeInspection")
+    @Column(length = 50)
+    private String[] phoneNumbers;
 
     @Version
     private short version;
@@ -86,11 +84,11 @@ public class Employee {
         this.version = version;
     }
 
-    public List<String> getPhoneNumbers() {
+    public String[] getPhoneNumbers() {
         return phoneNumbers;
     }
 
-    public void setPhoneNumbers(List<String> phoneNumbers) {
+    public void setPhoneNumbers(String[] phoneNumbers) {
         this.phoneNumbers = phoneNumbers;
     }
 

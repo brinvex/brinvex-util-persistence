@@ -55,7 +55,6 @@
     </scm>
 
     <modules>
-        <module>brinvex-util-persistence-entity-api</module>
         <module>brinvex-util-persistence-api</module>
         <module>brinvex-util-persistence-impl</module>
         <module>brinvex-util-persistence-dba</module>

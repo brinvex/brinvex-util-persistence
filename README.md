@@ -2,29 +2,21 @@
 
 ## Introduction
 
-_Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jakarta-JPA / Hibernate.
+_Brinvex-Util-Persistence_ is a compact Java library useful when writing persistence layer on top of Hibernate.
 
 
 ## Maven dependency declaration
-- Compile dependencies intended for @Entity classes 
-````
-<dependency>
-    <groupId>com.brinvex.util</groupId>
-    <artifactId>brinvex-util-persistence-entity-api</artifactId>
-    <version>1.5.4</version>
-</dependency>
-````
 - Compile and runtime dependencies intended for DAO classes
 ````
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-api</artifactId>
-    <version>1.5.4</version>
+    <version>2.0.0</version>
 </dependency>
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-impl</artifactId>
-    <version>1.5.4</version>
+    <version>2.0.0</version>
     <scope>runtime</scope>
 </dependency>
 ````
@@ -33,7 +25,7 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-dba-postgresql</artifactId>
-    <version>1.5.3</version>
+    <version>2.0.0</version>
 </dependency>
 ````
 
@@ -41,8 +33,9 @@ _Brinvex-Util-Persistence_ is a compact Java library that adds utilities for Jak
 
 | Brinvex-Util-Persistence | Java                                                       | Hibernate ORM | 
 |--------------------------|------------------------------------------------------------|---------------|
-| 1.4.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**     | 6.2, 6.3      | 
-| 1.5.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**     | 6.2, 6.3, 6.4 | 
+| 2.0.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**, 22 | 6.4           | 
+| 1.5.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**, 22 | 6.2, 6.3, 6.4 | 
+| 1.4.*                    | **11**, 12, 13, 14, 15, 16, **17**, 18, 19, 20, **21**, 22 | 6.2, 6.3      | 
 
 - **requires Hibernate ORM**
 - can be used in Spring based applications
