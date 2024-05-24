@@ -14,15 +14,13 @@
 # limitations under the License.
 #
 
-version: "3.9"
-
 volumes:
   postgresql_data:
 
 services:
 
   bx-util-persistence-postgres:
-    image: postgres:16.2
+    image: postgres:16.3
     environment:
       POSTGRES_DB: brinvex_util_persistence
       POSTGRES_USER: postgres

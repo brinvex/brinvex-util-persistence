@@ -27,9 +27,10 @@
     <artifactId>brinvex-util-persistence-impl</artifactId>
     <name>Brinvex-Util-Persistence - Impl</name>
     <description>
-        Brinvex-Util-Persistence is a compact Java library that adds utilities for Jakarta-JPA / Hibernate.
+        Brinvex-Util-Persistence is a compact Java library built on top of JPA/Hibernate.
+        Its aim isn't to be as magical and versatile as Spring Data,
+        but rather to be straightforward and focused on PostgreSQL and Microsoft SQL Server.
     </description>
-
     <properties>
         <rootDir>${project.basedir}/..</rootDir>
         <isPomPackagingModule>false</isPomPackagingModule>

@@ -26,7 +26,9 @@
 
     <name>Brinvex-Util-Persistence</name>
     <description>
-        Brinvex-Util-Persistence is a compact Java library that adds utilities for Jakarta-JPA / Hibernate.
+        Brinvex-Util-Persistence is a compact Java library built on top of JPA/Hibernate.
+        Its aim isn't to be as magical and versatile as Spring Data,
+        but rather to be straightforward and focused on PostgreSQL and Microsoft SQL Server.
     </description>
     <url>https://github.com/brinvex/brinvex-util-persistence</url>
     <inceptionYear>2023</inceptionYear>
@@ -79,8 +81,8 @@
         <logback-classic.version>1.4.14</logback-classic.version>
 
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
-        <hibernate-orm.version>6.4.4.Final</hibernate-orm.version>
-        <postgresql.version>42.6.1</postgresql.version>
+        <hibernate-orm.version>6.5.2.Final</hibernate-orm.version>
+        <postgresql.version>42.7.3</postgresql.version>
 
 
         <rootDir>${project.basedir}</rootDir>

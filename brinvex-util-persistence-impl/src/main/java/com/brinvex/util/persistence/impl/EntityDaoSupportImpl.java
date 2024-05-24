@@ -423,8 +423,9 @@ public class EntityDaoSupportImpl implements EntityDaoSupport {
     }
 
     /**
-     * As of 2023-01-11 JPA Pessimistic Locking is not properly supported by:
-     * Postgresql 15.2 + jdbc-driver-postgresql-42.5.4 + Hibernate 6.2.
+     * JPA Pessimistic Locking is not properly supported.
+     * 2023-01-11 Postgresql 15.2 + jdbc-driver-postgresql-42.5 + Hibernate 6.2.
+     * 2024-05-24 Postgresql 16.3 + jdbc-driver-postgresql-42.7 + Hibernate 6.5.
      * <p>
      * If the query-scoped timeout hint "jakarta.persistence.lock.timeout" is greater than 0 then it is just ignored,
      * and default wait_forever=-1 is applied.

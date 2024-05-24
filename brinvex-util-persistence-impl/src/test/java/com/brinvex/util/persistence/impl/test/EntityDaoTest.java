@@ -48,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EntityDaoTest extends AbstractTest {
@@ -67,7 +66,7 @@ public class EntityDaoTest extends AbstractTest {
         emp1.setName("Alice");
         emp1.setValidFrom(parse("2023-01-01").atStartOfDay());
         emp1.setValidTo(parse("2200-01-01").atStartOfDay());
-        emp1.setPhoneNumbers(new String[] {"0911 111 111"});
+        emp1.setPhoneNumbers(new String[]{"0911 111 111"});
 
         salary1_1 = new Salary();
         salary1_1.setEmployee(emp1);
@@ -515,7 +514,7 @@ public class EntityDaoTest extends AbstractTest {
                 fail();
             } catch (ClassCastException expected) {
             }
-       });
+        });
     }
 
 }
