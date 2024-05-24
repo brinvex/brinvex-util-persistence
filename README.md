@@ -13,21 +13,21 @@ but rather to be straightforward and focused on _PostgreSQL_ and _Microsoft SQL 
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-api</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
 </dependency>
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-impl</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <scope>runtime</scope>
 </dependency>
 ````
-- Standalone Java Utility for Postgresql Administration
+- Standalone Java Utility for PostgreSQL Administration
 ````
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-persistence-dba-postgresql</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
 </dependency>
 ````
 
