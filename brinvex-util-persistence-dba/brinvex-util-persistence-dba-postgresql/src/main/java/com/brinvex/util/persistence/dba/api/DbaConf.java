@@ -20,6 +20,15 @@ import java.util.StringJoiner;
 
 public class DbaConf {
 
+    /**
+     * https://www.postgresql.org/docs/16/app-pgdump.html
+     */
+    public enum BackupFormat {
+        PLAIN,
+        CUSTOM_ARCHIVE,
+        DIRECTORY
+    }
+
     private String host = "localhost";
     private int port = 5432;
     private String superUser = "postgres";
@@ -27,6 +36,8 @@ public class DbaConf {
     private Path dbHomePath;
     private Path dbDataPath;
     private Path dbToolsPath;
+    private BackupFormat backupFormat = BackupFormat.DIRECTORY;
+    private int backupRestoreParallelism = 1;
 
     public String getHost() {
         return host;
@@ -95,6 +106,25 @@ public class DbaConf {
         return this;
     }
 
+
+    public BackupFormat getBackupFormat() {
+        return backupFormat;
+    }
+
+    public DbaConf setBackupFormat(BackupFormat backupFormat) {
+        this.backupFormat = backupFormat;
+        return this;
+    }
+
+    public int getBackupRestoreParallelism() {
+        return backupRestoreParallelism;
+    }
+
+    public DbaConf setBackupRestoreParallelism(int backupRestoreParallelism) {
+        this.backupRestoreParallelism = backupRestoreParallelism;
+        return this;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", DbaConf.class.getSimpleName() + "[", "]")
@@ -105,6 +135,8 @@ public class DbaConf {
                 .add("dbDataPath=" + dbDataPath)
                 .add("toolsPath=" + dbToolsPath)
                 .add("dbSystemPath=" + getDbSystemPath())
+                .add("backupFormat=" + backupFormat)
+                .add("backupRestoreParallelism=" + backupRestoreParallelism)
                 .toString();
     }
 }

@@ -40,19 +40,19 @@ public class PostgresqlDbaTest {
     @EnabledIfSystemProperty(named = "enableHostSystemAffectingTests", matches = "true")
     @Test
     public void all() throws IOException {
-        Path testBasePath = Paths.get("c:/prj/brinvex/brinvex-util/brinvex-util-persistence/BrinvexDbaTest");
+        Path testBasePath = Paths.get("c:/prj/bx-util/bx-util-persistence/BrinvexDbaTest");
 
-        String appUser = "bx_app1_user1";
+        String appUser = "bx_app1";
         String appDb = "bx_app1";
 
         DbaConf baseConf = new DbaConf()
-                .setPort(5431)
+                .setPort(5430)
                 .setSuperPass("S3cr3t!123")
                 .setDbHomePath(testBasePath.resolve("postgresql"));
 
         DbaInstallConf installConf = new DbaInstallConf(baseConf)
                 .setEnvName("BrinvexDbaTest")
-                .setInstallerPath(testBasePath.resolve("install/postgresql-15.2-1-windows-x64.exe"))
+                .setInstallerPath(testBasePath.resolve("install/postgresql-16.3-1-windows-x64.exe"))
                 .addAllowedClientAddresses(List.of("192.168.0.0/16", "172.17.0.0/16"))
                 .addExtensions(List.of("btree_gist"))
                 .addAppUsers(Map.of(appUser, "bx_app_user1_123"))

@@ -37,7 +37,7 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
-@SuppressWarnings("SpellCheckingInspection")
+@SuppressWarnings({"SpellCheckingInspection", "ExtractMethodRecommender"})
 public class PostgresqlDbaManager implements DbaManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(PostgresqlDbaManager.class);
@@ -102,43 +102,41 @@ public class PostgresqlDbaManager implements DbaManager {
 
     @Override
     public void backupDatabase(DbaConf conf, String dbToBackup, Path backupPath) throws IOException {
-        var pgDumpPath = conf.getDbToolsPath().resolve("pg_dump");
-        var host = conf.getHost();
-        var port = conf.getPort();
-        var superUser = conf.getSuperUser();
-        var superPass = conf.getSuperPass();
-        backupDatabase(pgDumpPath, dbToBackup, backupPath, host, port, superUser, superPass);
+        Path pgDumpPath = conf.getDbToolsPath().resolve("pg_dump");
+        String host = conf.getHost();
+        int port = conf.getPort();
+        String superUser = conf.getSuperUser();
+        String superPass = conf.getSuperPass();
+        DbaConf.BackupFormat backupFormat = conf.getBackupFormat();
+        int parallelism = conf.getBackupRestoreParallelism();
+        backupDatabase(pgDumpPath, dbToBackup, backupPath, host, port, superUser, superPass, backupFormat, parallelism);
     }
 
     @Override
-    public void restoreDatabase(
-            DbaConf conf,
-            Path backupPath,
-            String db,
-            String owner
-    ) throws IOException {
+    public void restoreDatabase(DbaConf conf, Path backupPath, String db, String owner) throws IOException {
         var dbExists = databaseExists(conf, db);
         LOG.info("restore {} from backup {}, dbExists={}, {}", db, backupPath, dbExists, conf);
         if (dbExists) {
-            throw new IllegalArgumentException(String.format("Database already exists: %s", db));
+            throw new IllegalArgumentException(format("Database already exists: %s", db));
         }
 
         createDatabase(conf, db, owner);
 
-        var pgRestorePath = conf.getDbToolsPath().resolve("pg_restore");
-        var host = conf.getHost();
-        var port = conf.getPort();
-        var user = conf.getSuperUser();
-        var pass = conf.getSuperPass();
-        restoreDatabase(pgRestorePath, backupPath, host, port, user, pass, db, owner);
+        Path pgRestorePath = conf.getDbToolsPath().resolve("pg_restore");
+        String host = conf.getHost();
+        int port = conf.getPort();
+        String user = conf.getSuperUser();
+        String pass = conf.getSuperPass();
+        int parallelism = conf.getBackupRestoreParallelism();
+        restoreDatabase(pgRestorePath, backupPath, host, port, user, pass, db, owner, parallelism);
     }
 
     @Override
     public void backupAndDropDatabase(DbaConf conf, String db) throws IOException {
-        var dbDataBackupParentFolder = prepareDbDataBackupParentFolder(conf);
-        var ts = LocalDateTime.now().format(TIMESTAMP_FORMAT);
-        var oldDbDataBackupFolderName = format("%s_%s.backup", db, ts);
-        var oldDbDataBackupFolderPath = dbDataBackupParentFolder.resolve(oldDbDataBackupFolderName);
+        Path dbDataBackupParentFolder = prepareDbDataBackupParentFolder(conf);
+        String ts = LocalDateTime.now().format(TIMESTAMP_FORMAT);
+        String oldDbDataBackupFolderName = format("%s_%s.backup", db, ts);
+        Path oldDbDataBackupFolderPath = dbDataBackupParentFolder.resolve(oldDbDataBackupFolderName);
         LOG.info("restore {} - creating backup of old DB {}", db, oldDbDataBackupFolderPath);
         backupDatabase(conf, db, oldDbDataBackupFolderPath);
         LOG.info("restore {} - dropping old DB after successfull backup {}", db, oldDbDataBackupFolderPath);
@@ -148,7 +146,7 @@ public class PostgresqlDbaManager implements DbaManager {
     @Override
     public void riskyDropDatabase(DbaConf conf, String db) throws IOException {
         LOG.info("Drop DB {}, {}", db, conf);
-        executePsqlSuperCommand(conf, String.format("DROP DATABASE %s WITH (FORCE); ", db));
+        executePsqlSuperCommand(conf, format("DROP DATABASE %s WITH (FORCE); ", db));
     }
 
     @Override
@@ -242,8 +240,8 @@ public class PostgresqlDbaManager implements DbaManager {
     private boolean databaseExists(
             Path psqlPath, String host, int port, String db, String user, String pwd
     ) throws IOException {
-        var cmd = format("%s -U %s -h %s -p %s -XtA -c \"SELECT 1 FROM pg_database WHERE datname='%s'\"", psqlPath, user, host, port, db);
-        var envs = Set.of("PGPASSWORD=" + pwd);
+        String cmd = format("%s -U %s -h %s -p %s -XtA -c \"SELECT 1 FROM pg_database WHERE datname='%s'\"", psqlPath, user, host, port, db);
+        Set<String> envs = Set.of("PGPASSWORD=" + pwd);
         OsCmdResult r = OsCmdUtil.exec(cmd, envs);
         return "1".equals(r.getOut());
     }
@@ -256,13 +254,20 @@ public class PostgresqlDbaManager implements DbaManager {
             String user,
             String pwd,
             String newDbName,
-            String newOwner
+            String newOwner,
+            int parallelism
     ) throws IOException {
         dbBackupPath = dbBackupPath.toAbsolutePath();
         LOG.info("Restore DB {} from backup {}, host={}, port={}, newOwner={}", newDbName, dbBackupPath, host, port, newOwner);
-        var cmd = format("%s -U %s -h %s -p %s -d %s --no-owner --role=%s %s",
-                pgRestorePath, user, host, port, newDbName, newOwner, dbBackupPath);
-        var envs = Set.of("PGPASSWORD=" + pwd);
+        String paralelismOption;
+        if (parallelism != 1) {
+            paralelismOption = "-j " + parallelism;
+        } else {
+            paralelismOption = "";
+        }
+        String cmd = format("%s %s -U %s -h %s -p %s -d %s --no-owner --role=%s %s",
+                pgRestorePath, paralelismOption, user, host, port, newDbName, newOwner, dbBackupPath);
+        Set<String> envs = Set.of("PGPASSWORD=" + pwd);
         OsCmdResult r = OsCmdUtil.exec(cmd, envs);
         if (!r.getOut().isBlank() || !r.getErr().isBlank()) {
             throw new IOException(format("DB restore failed: %s", r));
@@ -270,12 +275,47 @@ public class PostgresqlDbaManager implements DbaManager {
     }
 
     private void backupDatabase(
-            Path pgDumpPath, String dbName, Path backupPath, String host, int port, String user, String pwd
+            Path pgDumpPath,
+            String dbName,
+            Path backupPath,
+            String host,
+            int port,
+            String user,
+            String pwd,
+            DbaConf.BackupFormat backupFormat,
+            int parallelism
     ) throws IOException {
         backupPath = backupPath.toAbsolutePath();
         LOG.info("Backup DB {}, host={}, port={}, backupPath={}", dbName, host, port, backupPath);
-        String cmd = format("%s -Fc -d postgresql://%s:%s@%s/%s --port %s --encoding UTF-8 --file %s",
-                pgDumpPath, user, pwd, host, dbName, port, backupPath);
+
+        String parallelismOption;
+        if (parallelism != 1) {
+            if (backupFormat == DbaConf.BackupFormat.DIRECTORY) {
+                parallelismOption = "-j " + parallelism;
+            } else {
+                throw new IllegalArgumentException(String.format("Parallel dumps are only supported for the DIRECTORY archive format, " +
+                        "parallelism=%d, backupFormat=%s", parallelism, backupFormat));
+            }
+        } else {
+            parallelismOption = "";
+        }
+
+        String backupFormatOption;
+        switch (backupFormat) {
+            case PLAIN:
+                backupFormatOption = "";
+                break;
+            case CUSTOM_ARCHIVE:
+                backupFormatOption = "-F c";
+                break;
+            case DIRECTORY:
+                backupFormatOption = "-F d";
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + backupFormat);
+        }
+        String cmd = format("%s %s %s -d postgresql://%s:%s@%s/%s --port %s --encoding UTF-8 --file %s",
+                pgDumpPath, backupFormatOption, parallelismOption, user, pwd, host, dbName, port, backupPath);
         OsCmdResult r = OsCmdUtil.exec(cmd);
         if (!r.getOut().isBlank() || !r.getErr().isBlank()) {
             throw new IOException(format("DB backup failed: %s", r));
@@ -374,8 +414,8 @@ public class PostgresqlDbaManager implements DbaManager {
     private OsCmdResult executePsqlCommand(
             Path psqlPath, String host, int port, String db, String user, String pwd, String psqlCmd
     ) throws IOException {
-        var cmd = format("%s -U %s -h %s -p %s -d %s -c \"%s\"", psqlPath, user, host, port, db, psqlCmd);
-        var envs = Set.of("PGPASSWORD=" + pwd);
+        String cmd = format("%s -U %s -h %s -p %s -d %s -c \"%s\"", psqlPath, user, host, port, db, psqlCmd);
+        Set<String> envs = Set.of("PGPASSWORD=" + pwd);
         return OsCmdUtil.exec(cmd, envs);
     }
 
